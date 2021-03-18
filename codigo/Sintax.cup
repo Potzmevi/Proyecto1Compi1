@@ -1,0 +1,125 @@
+package codigo;
+import java_cup.runtime.*;
+import java.util.ArrayList;
+import java.util.List;
+import Forma.Error;
+import Forma.*;
+parser code {:
+    private ArrayList<Formas> listaFormas= new ArrayList<Formas>();
+    private ArrayList<Error> errorsList= new ArrayList<Error>();
+    private ArrayList<Operador> listaOperadores= new ArrayList<Operador>();
+    public Parser(LexerCup lex) {
+        super(lex);
+        this.errorsList = new ArrayList();
+    }
+    @Override
+        public void syntax_error(Symbol st) {
+            System.out.println(st.value);
+            Token token = (Token) st.value;
+            report_error("Error Sintactico con el  Token:"+ token.getLexeme()+" este no pertenece a la estructura - linea: "+token.getLine()+" - columna: "+token.getColumn() +" Se esperaba: "+ "\n",null);       
+            Error error = new Error(token.getLexeme(),token.getLine(),token.getColumn(),0);
+            errorsList.add(error);
+        }
+    
+
+        //retorna list de errores sintacticos
+        public ArrayList<Error> getErrorsList(){
+            return errorsList
+            ;
+        }
+
+    
+:};
+
+terminal Token String,StringSin,MenorQue,MayorQue,DosPuntos,Coma,Exclamacion,IniciarSolicitud,FinSolicitud,Igual,Suma,Resta, Multiplicacion,Division,FinSolicitudes,IniciarSolicitudes;
+terminal Token CrearUsuario,ModificarUsuario,EliminarUsuario,Parentesis_a,Parentesis_c,Llave_a,Llave_c,Corchete_a,Corchete_c,LoginUsuario,NuevoFormulario,EliminarFormulario,ModificarFormulario,AgregarComponente;
+terminal Token ModificarComponente,EliminarComponente,ConsultarDatos,Usuario,Password,UsuarioAntiguo,UsuarioNuevo,NuevoPassword,ID,Titulo,Nombre,Tema,Clase,TextoVisible,Alineacion,Requerido,Opciones,Filas,Columnas;
+terminal Token URL,Consultas,FechaCreacion,CampoTexto,AreaTexto,Checkbox,Radio,Fichero,Imagen,Combo,Boton,TipoAlineacion,TipoTema,TipoRequerido,Fecha,IDCadena,CredencialesUsuario,ParametrosComponente,ParametrosFormulario;
+terminal Token Numero,ERROR;
+non terminal INICIO, TIPOSOLICITUD, LOGIN, CREACIONUSUARIO, FINALSOLICITUD, FINALSOLICITUDES,
+    SOLICITUD, INISOLICITUDES, SOLICITUDES, MODIFICARUSUARIO, ELIMINARUSUARIO, LOGINUSUARIO;
+
+start with INICIO;
+
+INICIO ::= 
+    SOLICITUD
+|    MenorQue Exclamacion IniciarSolicitudes MayorQue INISOLICITUDES
+|error:e {:
+            List expected = expected_token_ids();
+            System.out.println("Error en INICIO "+symbl_name_from_id((int) expected.get(0)) +String.valueOf(expected.size()));
+        :}
+;
+
+SOLICITUD ::=
+    MenorQue Exclamacion IniciarSolicitud DosPuntos TIPOSOLICITUD FINALSOLICITUD
+|error:e {:
+            List expected = expected_token_ids();
+            System.out.println("Error en SOLICITUD "+symbl_name_from_id((int) expected.get(0)) +String.valueOf(expected.size()));
+        :}FINALSOLICITUD
+;
+
+INISOLICITUDES ::=
+    SOLICITUD INISOLICITUDES {:System.out.println("Viene una solicitud");:}
+|   FINALSOLICITUDES    {:System.out.println("fin de solicitudes");:}
+;
+
+TIPOSOLICITUD ::=
+   CrearUsuario CREACIONUSUARIO
+|  ModificarUsuario MODIFICARUSUARIO
+|  EliminarUsuario ELIMINARUSUARIO
+|  LoginUsuario LOGINUSUARIO
+|error:e {: 
+            List expected = expected_token_ids();
+            System.out.println("Error en TIPOSOLICITUD "+symbl_name_from_id((int) expected.get(0)) +String.valueOf(expected.size()));
+             :}CREACIONUSUARIO
+;
+
+CREACIONUSUARIO ::=
+MayorQue Llave_a CredencialesUsuario DosPuntos Corchete_a Llave_a Usuario DosPuntos StringSin Coma Password DosPuntos StringSin Llave_c Corchete_c Llave_c
+| MayorQue Llave_a CredencialesUsuario DosPuntos Corchete_a Llave_a Usuario DosPuntos StringSin Coma Password DosPuntos StringSin Coma FechaCreacion DosPuntos Fecha Llave_c Corchete_c Llave_c
+|error:e {:
+            List expected = expected_token_ids();
+            System.out.println("Error en CREARUSUARIO "+symbl_name_from_id((int) expected.get(1)) +String.valueOf(expected.size()));
+        :}FINALSOLICITUD
+;
+
+MODIFICARUSUARIO ::=
+MayorQue Llave_a CredencialesUsuario DosPuntos Corchete_a Llave_a UsuarioAntiguo DosPuntos StringSin Coma UsuarioNuevo DosPuntos StringSin Coma NuevoPassword DosPuntos StringSin Llave_c Corchete_c Llave_c
+| MayorQue Llave_a CredencialesUsuario DosPuntos Corchete_a Llave_a UsuarioAntiguo DosPuntos StringSin Coma UsuarioNuevo DosPuntos StringSin Coma NuevoPassword DosPuntos StringSin Coma FechaCreacion DosPuntos Fecha Llave_c Corchete_c Llave_c
+|error:e {:
+            List expected = expected_token_ids();
+            System.out.println("Error en MODIFICARUSUARIO "+symbl_name_from_id((int) expected.get(0)) +String.valueOf(expected.size()));
+        :}FINALSOLICITUD
+;
+
+ELIMINARUSUARIO ::=
+MayorQue Llave_a CredencialesUsuario DosPuntos Corchete_a Llave_a Usuario DosPuntos StringSin Llave_c Corchete_c Llave_c
+|error:e {:
+            List expected = expected_token_ids();
+            System.out.println("Error en ELIMINARUSUARIO "+symbl_name_from_id((int) expected.get(0)) +String.valueOf(expected.size()));
+        :}FINALSOLICITUD
+;
+
+LOGINUSUARIO ::=
+MayorQue Llave_a CredencialesUsuario DosPuntos Corchete_a Llave_a Usuario DosPuntos StringSin Coma Password DosPuntos StringSin Llave_c Corchete_c Llave_c
+|error:e {:
+            List expected = expected_token_ids();
+            System.out.println("Error en LOGINUSUARIO "+symbl_name_from_id((int) expected.get(0)) +String.valueOf(expected.size()));
+        :}FINALSOLICITUD
+;
+
+FINALSOLICITUD ::=
+MenorQue FinSolicitud Exclamacion MayorQue
+|error:e {:
+            List expected = expected_token_ids();
+            System.out.println("Error en FINALSOLICITUD "+symbl_name_from_id((int) expected.get(0)) +String.valueOf(expected.size()));
+        :}SOLICITUD
+;
+
+FINALSOLICITUDES ::=
+MenorQue Exclamacion FinSolicitudes MayorQue 
+|error:e {:
+            List expected = expected_token_ids();
+            System.out.println("Error en FINALSOLICITUDES "+symbl_name_from_id((int) expected.get(0)) +String.valueOf(expected.size()));
+        :}
+;
